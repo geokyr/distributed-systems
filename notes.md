@@ -10,3 +10,9 @@ sudo vim /etc/hosts
     192.168.2.4     node4
     192.168.2.5     node5
 ```
+
+# pip
+```
+pip freeze > requirements.txt
+pip install -r requirements.txt
+```
