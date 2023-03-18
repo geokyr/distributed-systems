@@ -16,3 +16,10 @@ sudo vim /etc/hosts
 pip freeze > requirements.txt
 pip install -r requirements.txt
 ```
+
+# ssh
+```
+ssh-keygen
+ssh-copy-id user@snf-3529#.ok-kno.grnetcloud.net
+./copy-script.sh
+```

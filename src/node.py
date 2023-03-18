@@ -1,19 +1,21 @@
 import json
 import time
+import pickle
 import requests
 from Crypto.PublicKey import RSA
 from parameters import HEADERS, BOOTSTRAP_IP, BOOTSTRAP_PORT
 from wallet import Wallet
+from block import Blockchain
+from transaction import Transaction, TransactionOutput
 
 class Node:
     def __init__(self):
         self.id = None
         self.wallet = Wallet()
         self.ring = []
+        self.chain = Blockchain()
 
-        # TODO: chain
-
-    def ip_port_to_address(ip, port):
+    def ip_port_to_address(self, ip, port):
         return f"http://{ip}:{port}"
         
     def register_node_to_ring(self, id, ip, port, public_key, balance):
@@ -25,8 +27,50 @@ class Node:
             "public_key": public_key,
             "balance": balance
         })
-        print(f"Node {id} registered to the ring")
-        print(self.ring[id])
+
+    def share_ring(self, ring_node):
+        address = self.ip_port_to_address(ring_node["ip"], ring_node["port"])
+        data = pickle.dumps(self.ring)
+        requests.post(address + "/receive-ring", data=data)
+
+    def share_chain(self, ring_node):
+        address = self.ip_port_to_address(ring_node["ip"], ring_node["port"])
+        data = pickle.dumps(self.chain)
+        requests.post(address + "/receive-chain", data=data)
+    
+    def create_transaction(self, receiver_address, required):
+        sent = 0
+        inputs = []
+
+        for transaction in self.wallet.transactions:
+            for output in transaction.transaction_outputs:
+                if output.receiver == self.wallet.public_key and output.unspent:
+                    inputs.append(output.id)
+                    output.unspent = False
+                    sent += output.amount
+            
+            if sent >= required:
+                break
+            
+        if sent < required:
+            for transaction in self.wallet.transactions:
+                for output in transaction.transaction_outputs:
+                    if output.id in inputs:
+                        output.unspent = True
+            return False
+        
+        transaction = Transaction(
+            self.wallet.public_key,
+            receiver_address,
+            required,
+            sent,
+            inputs
+        )
+
+        transaction.sign_transaction(self.wallet.private_key)
+
+        # TODO: broadcast
+
 
 ########################################################################################################
 
