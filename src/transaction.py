@@ -55,9 +55,9 @@ class Transaction:
         self.signature = base64.b64encode(signer.sign(temp)).decode()
         return
 
-    def verify_signature(self, public_key):
+    def verify_signature(self):
         hash = self.create_hash_object()
-        rsa = RSA.importKey(public_key.encode())
+        rsa = RSA.importKey(self.sender_address.encode())
         verifier = pkcs1_15.new(rsa)
         try:
             verifier.verify(hash, base64.b64decode(self.signature))
@@ -71,6 +71,7 @@ class Transaction:
         sender_output = TransactionOutput(
             self.transaction_id, self.sender_address, self.sent - self.required)
         return [receiver_output, sender_output]
+
 
 # trans = Transaction("sender", "receiver", 10, 10, [0])
 # keys = RSA.generate(2048)

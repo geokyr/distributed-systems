@@ -1,7 +1,7 @@
 import time
 import json
 from Crypto.Hash import SHA256
-from parameters import DIFFICULTY
+from parameters import CAPACITY
  
 class Blockchain:
     def __init__(self):
@@ -19,7 +19,7 @@ class Block:
         self.current_hash = None
         self.previous_hash = previous_hash
         
-    def create_hash_object(self):
+    def create_hash(self):
         temp = self.__dict__.copy()
         temp.pop("current_hash", None)
         transactions = temp.pop("transactions", None)
@@ -28,11 +28,12 @@ class Block:
         hashable = json.dumps(temp, sort_keys=True).encode()
         return SHA256.new(hashable).hexdigest()
 
-    def mine_block(self):
-        while self.create_hash_object()[:DIFFICULTY] != '0' * DIFFICULTY:
-            self.nonce += 1
-        self.current_hash = self.create_hash_object()
-        return self
+    def check_block_capacity(self, transaction):
+        self.transactions.append(transaction)
+        if len(self.transactions) == CAPACITY:
+            return True
+
+        return False
 
 # block = Block(0, -1)
 # print(block.mine_block().current_hash)

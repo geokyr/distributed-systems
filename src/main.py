@@ -1,7 +1,6 @@
 import requests
 import pickle
-import time
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from argparse import ArgumentParser
 from parameters import HEADERS, BOOTSTRAP_IP, BOOTSTRAP_PORT, NUMBER_OF_NODES
@@ -14,7 +13,6 @@ import threading
 app = Flask(__name__)
 CORS(app)
 
-# global variables
 node = Node()
 
 if __name__ == '__main__':
@@ -38,12 +36,13 @@ if __name__ == '__main__':
             node.wallet.public_key, 
             100 * NUMBER_OF_NODES)
         
-        genesis_block = Block(0, 1)
-        genesis_transaction = Transaction("0", node.wallet.public_key, 100 * NUMBER_OF_NODES, 100 * NUMBER_OF_NODES)
+        genesis_block = node.create_new_block()
+        genesis_transaction = Transaction("0", node.wallet.public_key, 100 * NUMBER_OF_NODES, 100 * NUMBER_OF_NODES, [])
         genesis_block.transactions.append(genesis_transaction)
         node.wallet.transactions.append(genesis_transaction)
-        genesis_block.current_hash = genesis_block.create_hash_object()
+        genesis_block.current_hash = genesis_block.create_hash()
         node.chain.blocks.append(genesis_block)
+        node.current_block = None
 
         print("Bootstrap node registered to the ring")
     else:
@@ -81,7 +80,7 @@ def register_node():
         port,
         public_key,
         0)
-        
+
     if id == NUMBER_OF_NODES - 1:
         print("All nodes are registered to the ring")
 
@@ -110,6 +109,53 @@ def receive_chain():
 
     print("Chain received from bootstrap node")
     return jsonify({"message": "Chain received from bootstrap node"})
+
+# node validates a transaction
+@app.route('/validate-transaction', methods=['POST'])
+def validate_transaction():
+    transaction = pickle.loads(request.get_data())
+    
+    if node.validate_transaction(transaction):
+        return jsonify({"message": "Transaction is valid"}), 200
+    else:
+        return jsonify({'message': "Cannot verify signature of transaction"}), 400
+
+# node receives a transaction
+@app.route('/receive-transaction', methods=['POST'])
+def receive_transaction():
+    transaction = pickle.loads(request.get_data())
+    node.add_transaction_to_block(transaction)
+
+    return jsonify({"message": "Received transaction"}), 200
+
+# node receives a block
+@app.route('/receive-block', methods=['POST'])
+def receive_block():
+    block = pickle.loads(request.get_data())
+    node.chain_lock.acquire()
+    if node.validate_block(block):
+        with node.mining_lock:
+            node.chain.blocks.append(block)
+            node.chain_lock.release()
+    else:
+        if node.validate_previous_hash(block):
+            node.chain_lock.release()
+            return jsonify({"message": "Cannot verify signature of block"}), 400
+        else:
+            if node.resolve_conflicts(block):
+                with node.mining_lock:
+                    node.chain.blocks.append(block)
+                    node.chain_lock.release()
+            else:
+                node.chain_lock.release()
+                return jsonify({"mesage": "Cannot accept block"}), 400
+
+    return jsonify({"message": "Received block"}), 200
+
+# node sends its chain
+@app.route('/send-chain', methods=['GET'])
+def send_chain():
+    return pickle.dumps(node.chain)
 
 if __name__ == '__main__':
     app.run(host=ip, port=port)
