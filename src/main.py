@@ -5,7 +5,6 @@ from flask_cors import CORS
 from argparse import ArgumentParser
 from parameters import HEADERS, BOOTSTRAP_IP, BOOTSTRAP_PORT, NUMBER_OF_NODES
 from node import Node
-from block import Block
 from transaction import Transaction
 import json
 import threading
@@ -36,7 +35,8 @@ if __name__ == '__main__':
             node.wallet.public_key, 
             100 * NUMBER_OF_NODES)
         
-        genesis_block = node.create_new_block()
+        node.create_new_block()
+        genesis_block = node.current_block
         genesis_transaction = Transaction("0", node.wallet.public_key, 100 * NUMBER_OF_NODES, 100 * NUMBER_OF_NODES, [])
         genesis_block.transactions.append(genesis_transaction)
         node.wallet.transactions.append(genesis_transaction)
@@ -44,6 +44,10 @@ if __name__ == '__main__':
         node.chain.blocks.append(genesis_block)
         node.current_block = None
 
+        node.wait_for_all_nodes_to_register = threading.Event()
+        thread = threading.Thread(target=node.all_nodes_registered)
+        thread.start()
+        
         print("Bootstrap node registered to the ring")
     else:
         bootstrap_address = node.ip_port_to_address(BOOTSTRAP_IP, BOOTSTRAP_PORT)
@@ -53,18 +57,13 @@ if __name__ == '__main__':
             "public_key": node.wallet.public_key,
         })
 
-        # use a thread to register the node to the ring
-        def register_request():
-            response = requests.post(
-                bootstrap_address + "/register-node",
-                data=data,
-                headers=HEADERS)
+        response = requests.post(
+            bootstrap_address + "/register-node",
+            data=data,
+            headers=HEADERS)
 
-            node.id = response.json()["id"]
-            print(response.json()["message"])
-
-        thread = threading.Thread(target=register_request)
-        thread.start()
+        node.id = response.json()["id"]
+        print(response.json()["message"])
 
 # bootstrap node registers another node to the ring
 @app.route('/register-node', methods=['POST'])
@@ -81,15 +80,8 @@ def register_node():
         public_key,
         0)
 
-    if id == NUMBER_OF_NODES - 1:
-        print("All nodes are registered to the ring")
-
-        for ring_node in node.ring[1:]:
-            node.share_ring(ring_node)
-            node.share_chain(ring_node)
-
-        for ring_node in node.ring[1:]:
-            node.create_transaction(ring_node["public_key"], 100)
+    if len(node.ring) == NUMBER_OF_NODES:
+        node.wait_for_all_nodes_to_register.set()
 
     print(f"Node with ID {id} registered to the ring")
     return jsonify({"message": f"Node with ID {id} registered to the ring", "id": id})
@@ -110,6 +102,11 @@ def receive_chain():
     print("Chain received from bootstrap node")
     return jsonify({"message": "Chain received from bootstrap node"})
 
+# node sends its chain
+@app.route('/send-chain', methods=['GET'])
+def send_chain():
+    return pickle.dumps(node.chain)
+
 # node validates a transaction
 @app.route('/validate-transaction', methods=['POST'])
 def validate_transaction():
@@ -120,42 +117,32 @@ def validate_transaction():
     else:
         return jsonify({'message': "Cannot verify signature of transaction"}), 400
 
-# node receives a transaction
-@app.route('/receive-transaction', methods=['POST'])
-def receive_transaction():
-    transaction = pickle.loads(request.get_data())
-    node.add_transaction_to_block(transaction)
-
-    return jsonify({"message": "Received transaction"}), 200
-
-# node receives a block
-@app.route('/receive-block', methods=['POST'])
-def receive_block():
+# node validates a block
+@app.route('/validate-block', methods=['POST'])
+def validate_block():
     block = pickle.loads(request.get_data())
+    
     node.chain_lock.acquire()
     if node.validate_block(block):
-        with node.mining_lock:
-            node.chain.blocks.append(block)
-            node.chain_lock.release()
+        print("Block is valid")
+        node.chain.blocks.append(block)
+        node.chain_lock.release()
     else:
         if node.validate_previous_hash(block):
+            print("Block previous hash is valid")
             node.chain_lock.release()
             return jsonify({"message": "Cannot verify signature of block"}), 400
         else:
             if node.resolve_conflicts(block):
-                with node.mining_lock:
-                    node.chain.blocks.append(block)
-                    node.chain_lock.release()
+                print("There was a conflict")
+                node.chain.blocks.append(block)
+                node.chain_lock.release()
             else:
+                print("Failed to resolve conflict")
                 node.chain_lock.release()
                 return jsonify({"mesage": "Cannot accept block"}), 400
-
+    print("Finally accepted block")
     return jsonify({"message": "Received block"}), 200
-
-# node sends its chain
-@app.route('/send-chain', methods=['GET'])
-def send_chain():
-    return pickle.dumps(node.chain)
 
 if __name__ == '__main__':
     app.run(host=ip, port=port)

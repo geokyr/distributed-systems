@@ -15,6 +15,9 @@ class TransactionOutput:
         self.amount = amount
         self.unspent = True
 
+    def __str__(self):
+        return str(self.__dict__)
+
 class Transaction:
     def __init__(self, sender_address, receiver_address, required, sent, transaction_inputs):
         self.sender_address = sender_address
@@ -22,22 +25,15 @@ class Transaction:
         self.required = required
         self.sent = sent
         self.transaction_inputs = transaction_inputs
-        self.transaction_id = self.create_hash_object().hexdigest()
-        self.transaction_outputs = self.calculate_transaction_outputs()
+        self.transaction_id = None
+        self.transaction_outputs = []
         self.signature = None
 
-    @property
-    def as_dict(self):
-        return {
-            "sender_address": self.sender_address,
-            "receiver_address": self.receiver_address,
-            "required": self.required,
-            "sent": self.sent,
-            "transaction_id": self.transaction_id,
-            "transaction_inputs": [transaction_input.__dict__ for transaction_input in self.transaction_inputs],
-            "transaction_outputs": [transaction_output.__dict__ for transaction_output in self.transaction_outputs],
-            "signature": self.signature
-        }
+        self.transaction_id = self.create_hash_object().hexdigest()
+        self.transaction_outputs = self.calculate_transaction_outputs()
+
+    def __str__(self):
+        return str(self.__dict__)
 
     def create_hash_object(self):
         temp = self.__dict__.copy()
@@ -47,6 +43,13 @@ class Transaction:
 
         hashable = json.dumps(temp, sort_keys=True).encode()
         return SHA256.new(hashable)
+
+    def calculate_transaction_outputs(self):
+        receiver_output = TransactionOutput(
+            self.transaction_id, self.receiver_address, self.required)
+        sender_output = TransactionOutput(
+            self.transaction_id, self.sender_address, self.sent - self.required)
+        return [receiver_output, sender_output]
 
     def sign_transaction(self, private_key):
         temp = self.create_hash_object()
@@ -65,26 +68,15 @@ class Transaction:
         except (ValueError, TypeError):
             return False
 
-    def calculate_transaction_outputs(self):
-        receiver_output = TransactionOutput(
-            self.transaction_id, self.receiver_address, self.required)
-        sender_output = TransactionOutput(
-            self.transaction_id, self.sender_address, self.sent - self.required)
-        return [receiver_output, sender_output]
-
-
-# trans = Transaction("sender", "receiver", 10, 10, [0])
 # keys = RSA.generate(2048)
 # public_key = keys.publickey().exportKey().decode()
 # private_key = keys.exportKey().decode()
 
-# print(trans.__dict__)
+# trans = Transaction(public_key, "receiver", 10, 10, [0])
+# print(trans)
+# print([str(output) for output in trans.transaction_outputs])
+
 # trans.sign_transaction(private_key)
 # print(trans.transaction_id)
 # print(trans.signature)
-# print(trans.verify_signature(public_key))
-
-# transaction = Transaction("sender", "receiver", 20, 20, [0])
-# print(transaction.transaction_outputs[0].transaction_id)
-# print(transaction.transaction_outputs[1].transaction_id)
-# print(transaction.transaction_id)
+# print(trans.verify_signature())

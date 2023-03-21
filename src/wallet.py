@@ -8,7 +8,10 @@ class Wallet:
         self.private_key = keys.exportKey().decode()
         self.transactions = []
 
-    def get_balance(self):
+    def __str__(self):
+        return str(self.__dict__)
+
+    def wallet_balance(self):
         balance = 0
         for transaction in self.transactions:
             for output in transaction.transaction_outputs:
@@ -17,6 +20,11 @@ class Wallet:
         return balance
 
 # wallet = Wallet()
-# print(wallet.public_key)
-# print(wallet.private_key)
-# print(wallet.get_balance())
+
+# from transaction import Transaction
+# trans = Transaction(wallet.public_key, "receiver", 10, 50, [0])
+# wallet.transactions.append(trans)
+
+# print(wallet.wallet_balance())
+# print(wallet)
+# print([str(transaction) for transaction in wallet.transactions])
