@@ -1,82 +1,62 @@
 import json
 import base64
+from collections import OrderedDict
+
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 
-class TransactionOutput:
-    id_counter = 0
-
-    def __init__(self, transaction_id, receiver, amount):
-        self.id = TransactionOutput.id_counter
-        TransactionOutput.id_counter += 1
-        self.transaction_id = transaction_id
-        self.receiver = receiver
-        self.amount = amount
-        self.unspent = True
-
-    def __str__(self):
-        return str(self.__dict__)
-
 class Transaction:
-    def __init__(self, sender_address, receiver_address, required, sent, transaction_inputs):
-        self.sender_address = sender_address
-        self.receiver_address = receiver_address
-        self.required = required
-        self.sent = sent
-        self.transaction_inputs = transaction_inputs
-        self.transaction_id = None
-        self.transaction_outputs = []
-        self.signature = None
+    def __init__(self, sender, sender_id, receiver, receiver_id, amount, inputs, outputs=[], id=None, signature=None):
+        self.sender = sender
+        self.sender_id = sender_id
+        self.receiver = receiver
+        self.receiver_id = receiver_id
+        self.amount = amount
+        self.inputs = inputs
+        self.id = id
+        self.outputs = outputs
+        self.signature = signature
 
-        self.transaction_id = self.create_hash_object().hexdigest()
-        self.transaction_outputs = self.calculate_transaction_outputs()
+    def __eq__(self, other):
+        if not isinstance(other, Transaction):
+            return NotImplemented
+        return self.id == other.id
 
-    def __str__(self):
-        return str(self.__dict__)
-
-    def create_hash_object(self):
-        temp = self.__dict__.copy()
-        temp.pop("transaction_id", None)
-        temp.pop("signature", None)
-        temp.pop("transaction_outputs", None)
-
-        hashable = json.dumps(temp, sort_keys=True).encode()
+    def hash_transaction(self):
+        temp = OrderedDict([
+            ("sender", self.sender),
+            ("receiver", self.receiver),
+            ("amount", self.amount),
+            ("inputs", self.inputs)
+        ])
+        hashable = json.dumps(temp).encode()
         return SHA256.new(hashable)
 
-    def calculate_transaction_outputs(self):
-        receiver_output = TransactionOutput(
-            self.transaction_id, self.receiver_address, self.required)
-        sender_output = TransactionOutput(
-            self.transaction_id, self.sender_address, self.sent - self.required)
-        return [receiver_output, sender_output]
-
     def sign_transaction(self, private_key):
-        temp = self.create_hash_object()
-        rsa = RSA.importKey(private_key.encode())
-        signer = pkcs1_15.new(rsa)
-        self.signature = base64.b64encode(signer.sign(temp)).decode()
-        return
+        hash = self.hash_transaction()
+        key = RSA.importKey(private_key)
+        signer = pkcs1_15.new(key)
+        self.id = hash.hexdigest()
+        self.signature = base64.b64encode(signer.sign(hash)).decode()
+        return self.signature
 
     def verify_signature(self):
-        hash = self.create_hash_object()
-        rsa = RSA.importKey(self.sender_address.encode())
-        verifier = pkcs1_15.new(rsa)
-        try:
-            verifier.verify(hash, base64.b64decode(self.signature))
-            return True
-        except (ValueError, TypeError):
-            return False
+        hash = self.hash_transaction()
+        key = RSA.importKey(self.sender.encode())
+        verifier = pkcs1_15.new(key)
+        return verifier.verify(hash, base64.b64decode(self.signature))
 
 # keys = RSA.generate(2048)
 # public_key = keys.publickey().exportKey().decode()
 # private_key = keys.exportKey().decode()
 
-# trans = Transaction(public_key, "receiver", 10, 10, [0])
-# print(trans)
-# print([str(output) for output in trans.transaction_outputs])
-
+# trans = Transaction(public_key, 1, public_key, 2, 10, [1])
 # trans.sign_transaction(private_key)
-# print(trans.transaction_id)
+
+# trans.outputs.append({"id": 0, "receiver": public_key, "amount": 0})
+# trans.outputs.append({"id": 0, "receiver": public_key, "amount": 10})
+
+# print(trans.id)
 # print(trans.signature)
 # print(trans.verify_signature())
