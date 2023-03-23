@@ -13,7 +13,7 @@ class Blockchain:
     def add_block(self, new_block):
         self.blocks.append(new_block)
         print(f"Current blockchain length:\t{str(len(self.blocks))}")
-        print(f"The blocks are:")
+        print(f"The blockchain blocks are:")
         self.print_chain()
 
     def print_chain(self):

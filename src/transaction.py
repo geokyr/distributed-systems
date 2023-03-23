@@ -45,7 +45,11 @@ class Transaction:
         hash = self.hash_transaction()
         key = RSA.importKey(self.sender.encode())
         verifier = pkcs1_15.new(key)
-        return verifier.verify(hash, base64.b64decode(self.signature))
+        try:
+            verifier.verify(hash, base64.b64decode(self.signature))
+            return True
+        except (ValueError, TypeError):
+            return False
 
 # keys = RSA.generate(2048)
 # public_key = keys.publickey().exportKey().decode()
