@@ -51,8 +51,7 @@ def home_or_exit():
             'type': 'list',
             'name': 'option',
             'message': 'select option:',
-            'choices': ['home', 'exit'],
-            'filter': lambda val: val.lower()
+            'choices': ['home', 'exit']
         }]
     home_or_exit_answer = prompt(home_or_exit_question)['option']
     return home_or_exit_answer
@@ -75,7 +74,8 @@ def client():
         # Case of new transaction
         if answer == 'new transaction':
             print("new transaction")
-            print("-" * 30)
+            print("---------------")
+            print()
             transaction_question = [{
                     'type': 'input',
                     'name': 'receiver',
@@ -106,7 +106,7 @@ def client():
                 try:
                     response = requests.post(address, data=transaction_answer).json()
                     message = response["message"]
-                    print(message + '\n')
+                    print(message.lower() + '\n')
                 except:
                     print("\nnode is not active, try again later\n")
                 if home_or_exit() == 'exit':
@@ -119,19 +119,16 @@ def client():
         # Case of view last transactions
         elif answer == 'view last transactions':
             print("transactions of last valid block of noobcash's blockchain")
-            print("-" * 30)
+            print("---------------------------------------------------------")
+            print()
             address = 'http://' + IPAddr + ':' + str(PORT) + '/api/get_transactions'
             try:
                 # Build a table with the transactions
                 response = requests.get(address)
                 data = pickle.loads(response._content)
                 table = Texttable()
-                table.set_deco(Texttable.HEADER)
-                table.set_cols_dtype(['t',  # text
-                                      't',  # text
-                                      't',  # text
-                                      't',  # text
-                                      't'])  # text
+                table.set_deco(Texttable.HEADER | Texttable.VLINES)
+                table.set_cols_dtype(['t', 't', 't', 't', 't'])
                 table.set_cols_align(["c", "c", "c", "c", "c"])
                 headers = ["sender_id", "receiver_id", "amount", "total", "change"]
                 rows = []
@@ -149,12 +146,13 @@ def client():
         # Case of show balance
         elif answer == 'balance':
             print("balance")
-            print("-" * 30)
+            print("-------")
+            print()
             address = 'http://' + IPAddr + ':' + str(PORT) + '/api/get_balance'
             try:
                 response = requests.get(address).json()
                 balance = str(response['balance'])
-                print('current balance:' + balance + ' nbc')
+                print('current balance: ' + balance + ' nbc\n')
             except:
                 print("\nnode is not active, try again later\n")
             if home_or_exit() == 'exit':
@@ -165,7 +163,8 @@ def client():
         # Case of help
         elif answer == 'help':
             print("help")
-            print("-" * 30)
+            print("----")
+            print()
             print("options:")
             print("- new transaction: input the recipient id and the amount of nbc to send")
             print("- view last transactions: show the transactions of the last valid block")

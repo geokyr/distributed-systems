@@ -152,7 +152,7 @@ def create_transaction():
         else:
             return jsonify({'message': 'Not enough coins', 'balance': node.wallet.wallet_balance(), "mining_time": creation["mining_time"]}), 400
     else:
-        return jsonify({'message': 'Wrong receiver', "mining_time": creation["mining_time"]}), 400
+        return jsonify({'message': 'Wrong receiver', "mining_time": 0}), 400
 
 
 @rest_api.route('/api/get_balance', methods=['GET'])

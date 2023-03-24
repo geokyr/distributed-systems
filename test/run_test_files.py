@@ -1,13 +1,11 @@
 import os
 import requests
 import socket
-import pickle
 import sys
 import time
 import subprocess
 
 from argparse import ArgumentParser
-from texttable import Texttable
 
 # Add config file in our path.
 sys.path.insert(0, '../src')
@@ -85,7 +83,8 @@ def start_transactions():
         throughput = num_transactions/total_time
         block_time = total_mining_time/num_blocks
 
-        with open('./results', 'a') as f: # +str(port)
+        # with open('./5node' + str(node_id) + '.txt', 'a') as f:
+        with open('./10node' + str(node_id), 'a') as f:
             f.write('------------------------\n')
             f.write('Final results for node %d\n' %node_id)
             f.write('------------------------\n')
