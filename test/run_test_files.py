@@ -76,14 +76,6 @@ def start_transactions():
     print(f"\nTransactions for node {id} are done and the results are available on the results file")
 
     try:
-        address = 'http://' + IPAddr + ':' + \
-            str(port) + '/api/get_my_transactions'
-        response = requests.get(address)
-        data = pickle.loads(response._content)
-    except:
-        exit("\nSomething went wrong while receiving your transactions.\n")
-
-    try:
         address = 'http://' + IPAddr + ':' + str(port) + '/api/get_metrics'
         response = requests.get(address).json()
         num_blocks = response['num_blocks'] - 1
@@ -98,7 +90,7 @@ def start_transactions():
             f.write('Final results for node %d\n' %node_id)
             f.write('------------------------\n')
             f.write('Throughput: %f\n' %throughput)
-            f.write('Block time %f\n' %block_time)
+            f.write('Block time: %f\n' %block_time)
             f.write('Capacity: %d\n' %capacity)
             f.write('Difficulty: %d\n' %difficulty)
             f.write('\n')

@@ -14,8 +14,7 @@ from flask import Flask
 from transaction import Transaction
 from endpoints import node, rest_api
 
-# All nodes are aware of the ip and the port of the bootstrap
-# node, in order to communicate with it when entering the network.
+# All nodes know the ip and the port of the bootstrap node
 BOOTSTRAP_IP = config.BOOTSTRAP_IP
 BOOTSTRAP_PORT = config.BOOTSTRAP_PORT
 
@@ -43,13 +42,12 @@ else:
     hostname = socket.gethostname()
     IPAddr = ip_address()
 
-# Define the flask environment and register the blueprint with the endpoints.
+# Register the blueprint with the endpoints
 app = Flask(__name__)
 app.register_blueprint(rest_api)
 CORS(app)
 
 if __name__ == '__main__':
-    # Define the argument parser.
     parser = ArgumentParser(description='Rest api of noobcash.')
 
     required = parser.add_argument_group('required arguments')
@@ -60,8 +58,7 @@ if __name__ == '__main__':
     required.add_argument('-c', type=int, help='capacity of a block', required=True)
     optional.add_argument('-b', '--bootstrap', action='store_true',
                           help='set if the current node is the bootstrap')
-
-    # Parse the given arguments.
+    
     args = parser.parse_args()
     port = args.p
     endpoints.n = args.n
@@ -69,41 +66,28 @@ if __name__ == '__main__':
     is_bootstrap = args.bootstrap
 
     if (is_bootstrap):
-        """
-        The bootstrap node (id = 0):
-            - registers itself in the ring.
-            - creates the genesis block.
-            - creates the first transaction and adds it in the genesis block.
-            - adds the genesis block in the blockchain (no validation).
-            - starts listening in the desired port.
-        """
+        # Bootstrap node, registers itself, creates the genesis block, the first transaction and adds it in the genesis block
         node.id = 0
         node.register_node_to_ring(
             node.id, BOOTSTRAP_IP, BOOTSTRAP_PORT, node.wallet.public_key, 100 * endpoints.n)
 
-        # Defines the genesis block.
+        # Create genesis block
         gen_block = node.create_new_block()
         gen_block.nonce = 0
 
-        # Adds the first and only transaction in the genesis block.
+        # Adds the first transaction on the genesis block
         first_transaction = Transaction("0", '0', node.wallet.public_key, node.id, 100 * endpoints.n, 100 * endpoints.n, None)
         gen_block.transactions.append(first_transaction)
         gen_block.hash = gen_block.hash_block()
         node.wallet.transactions.append(first_transaction)
 
-        # Add the genesis block in the chain.
+        # Add genesis block in the blockchain
         node.chain.blocks.append(gen_block)
         node.current_block = None
 
-        # Listen in the specified address (ip:port)
         app.run(host=BOOTSTRAP_IP, port=BOOTSTRAP_PORT)
     else:
-        """
-        The rest nodes (id = 1, .., n-1):
-            - communicate with the bootstrap node in order to register them.
-            - starts listening in the desired port.
-        """
-
+        # Other nodes, request to be registered on the ring
         register_address = 'http://' + BOOTSTRAP_IP + \
             ':' + BOOTSTRAP_PORT + '/register_node'
 
@@ -112,13 +96,11 @@ if __name__ == '__main__':
 
             data = {
                 'public_key': node.wallet.public_key,
-                'ip': IPAddr, 'port': port
-            }
+                'ip': IPAddr, 'port': port}
 
             response = requests.post(
                 register_address,
-                data=data
-            )
+                data=data)
 
             if response.status_code == 200:
                 print("Node initialized")
@@ -128,5 +110,4 @@ if __name__ == '__main__':
         req = threading.Thread(target=thread_function, args=())
         req.start()
 
-        # Listen in the specified address (ip:port)
         app.run(host=IPAddr, port=port)

@@ -6,23 +6,23 @@ from Crypto.Signature import pss
 
 class Transaction:
     """
-    A noobcash transaction in the blockchain
+    Class for a transaction in the blockchain
 
-    Attributes:
-        sender (int): the public key of the sender's wallet.
-        sender_id (int): the id of the sender node.
-        receiver (int): the public key of the receiver's wallet.
-        receiver_id (int): the id of the receiver node.
-        amount (int): the amount of nbc to transfer.
-        inputs (list): list of TransactionInput.
-        total (int): the amount of money that the sender send for the transaction.
-        id (int): hash of the transaction.
-        outputs (list): list of TransactionOutput.
-        signature (int): signature that verifies that the owner of the wallet created the transaction.
+    sender: sender's public key
+    sender_id: id of the sender
+    receiver: receiver's public key
+    receiver_id: id of the receiver
+    amount: amount of nbc to transfer
+    total: total amount that sender sends
+    inputs: list of TransactionInput
+    id: hash of the transaction
+    outputs: list of TransactionOutput
+    signature: signature of the transaction
     """
 
     def __init__(self, sender, sender_id, receiver, receiver_id, amount, total, inputs, id=None, outputs=None, signature=None):
-        """Inits a Transaction"""
+        """Initializes a Transaction"""
+        
         self.sender = sender
         self.sender_id = sender_id
         self.receiver = receiver
@@ -44,33 +44,29 @@ class Transaction:
         self.signature = signature
 
     def __eq__(self, transaction):
-        """Overrides the default method for comparing Transaction objects.
+        """Overrides the default method and checks the equality of 2 Transaction
+        objects by comparing their hashes"""
 
-        Two transactions are equal if their id is equal.
-        """
         return self.id == transaction.id
 
     def __str__(self):
-        """Returns a string representation of a Transaction object"""
+        """String representation of a Transaction"""
+        
         return str(self.__class__) + ": " + str(self.__dict__)
 
     def convert_to_list(self):
-        """Converts a Transaction object into a list."""
+        """List representation of a Transaction"""
+        
         return [self.sender_id, self.receiver_id, self.amount, self.total, self.total - self.amount]
 
     def hash_transaction(self):
-        """Computes the hash of the transaction."""
+        """Calculate the hash of the Τransaction"""
 
         # The hash is a random integer, at most 256 bits long.
         return Crypto.Random.get_random_bytes(256).decode("ISO-8859-1")
 
     def calculate_outputs(self):
-        """Compute the outputs of the transaction, if not set.
-
-        The computation includes:
-            - an output for the nbcs sent to the receiver.
-            - an output for the nbcs sent back to the sender as change.
-        """
+        """Compute Transaction outputs"""
 
         self.outputs = [TransactionOutput(self.id, self.receiver, self.amount)]
 
@@ -79,7 +75,7 @@ class Transaction:
             self.outputs.append(TransactionOutput(self.id, self.sender, self.total - self.amount))
 
     def sign_transaction(self, private_key):
-        """Sign the current transaction with the given private key."""
+        """Sign the Transaction using a private key"""
 
         temp = self.id.encode("ISO-8859-1")
         key = RSA.importKey(private_key.encode("ISO-8859-1"))
@@ -88,7 +84,7 @@ class Transaction:
         self.signature = signer.sign(hashed).decode("ISO-8859-1")
 
     def verify_signature(self):
-        """Verifies the signature of a transaction."""
+        """Verify the signature of a Transaction"""
 
         key = RSA.importKey(self.sender.encode("ISO-8859-1"))
         hashed = SHA256.new(self.id.encode("ISO-8859-1"))
@@ -101,35 +97,36 @@ class Transaction:
 
 class TransactionInput:
     """
-    The transaction input of a noobcash transaction.
-
-    Attributes:
-        output_id (int): id of the transaction that the coins come from.
+    Class for a TransactionInput of a Transaction
+    
+    output_id: id of the TransactionOutput that is used as TransactionInput
     """
 
     def __init__(self, output_id):
-        """Inits a TransactionInput."""
+        """Initiliazes a TransactionInput"""
+        
         self.output_id = output_id
 
 
 class TransactionOutput:
     """
-    A transaction output of a noobcash transaction.
+    Class for a TransactionOutput of a Transaction
 
-    Attributes:
-        transaction_id (int): id of the transaction.
-        target (int): the target of the transaction.
-        amount (int): the amount of nbcs to be transfered.
-        unspent (boolean): false if this output has been used as input in a transaction.
+    transaction_id: id of the transaction
+    target: target of the TranscationOutput
+    amount: amount of nbc to be credited to the target
+    unspent: boolean of whether this output has been used or not
     """
 
     def __init__(self, transaction_id, target, amount):
-        """Inits a TransactionOutput."""
+        """Initiliazes a TransactionOutput"""
+
         self.transaction_id = transaction_id
         self.target = target
         self.amount = amount
         self.unspent = True
 
     def __str__(self):
-        """Returns a string representation of a TransactionOutput object"""
+        """String representation of a Transaction Output object"""
+
         return str(self.__dict__)

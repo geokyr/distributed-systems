@@ -4,19 +4,19 @@ from Crypto.Hash import SHA256
 
 class Block:
     """
-    A block in the blockchain.
+    Class for a Block of the blockchain
 
-    Attributes:
-        index (int): the sequence number of the block.
-        timestamp (float): timestamp of the creation of the block.
-        transactions (list): list of all the transactions in the block.
-        nonce (int): the solution of proof-of-work.
-        previous_hash (hash object): hash of the previous block in the blockchain.
-        hash (hash object): hash of the block.
+    index: index of the Block
+    timestamp: timestamp of the Block's creation
+    transactions: list of the Block's transactions
+    nonce: proof-of-work
+    previous_hash: hash of the previous Block
+    hash: hash of the Block
     """
 
     def __init__(self, index, previous_hash):
-        """Inits a Block"""
+        """Initializes a Block"""
+
         self.index = index
         self.timestamp = time.time()
         self.transactions = []
@@ -25,18 +25,18 @@ class Block:
         self.hash = None
 
     def __str__(self):
-        """Returns a string representation of a Block object"""
+        """String representation of a Block"""
+
         return str(self.__class__) + ": " + str(self.__dict__)
 
     def __eq__(self, block):
-        """Overrides the default method for comparing Block objects.
+        """Overrides the default method and checks the equality of 2 Block
+        objects by comparing their hashes"""
 
-        Two blocks are equal if their hash is equal.
-        """
         return self.hash == block.hash
 
     def add_transaction_and_check(self, transaction, capacity):
-        """Adds a new transaction in the block."""
+        """Adds a new transaction in the Block"""
 
         self.transactions.append(transaction)
         if len(self.transactions) == capacity:
@@ -45,7 +45,7 @@ class Block:
         return False
 
     def hash_block(self):
-        """Computes the current hash of the block."""
+        """Calculates the hash of the Block"""
 
         # We should compute current hash without using the
         # field self.hash.
@@ -55,21 +55,21 @@ class Block:
         return SHA256.new(block_dump.encode("ISO-8859-1")).hexdigest()
 
 class Blockchain:
-    """
-    The blockchain of the noobcash
+    """Class for a blockchain
 
-    Attributes:
-        blocks (list): list that contains the validated blocks of the chain.
-    """
+    blocks: list of validated blocks in the chain"""
 
     def __init__(self):
-        """Inits a Blockchain"""
+        """Initializes a Blockchain"""
+        
         self.blocks = []
 
     def __str__(self):
-        """Returns a string representation of a Blockchain object"""
+        """String representation of a Blockchain"""
+
         return str(self.__class__) + ": " + str(self.__dict__)
 
     def add_block(self, block):
-        """Adds a new block in the chain."""
+        """Adds a new block in the chain"""
+
         self.blocks.append(block)

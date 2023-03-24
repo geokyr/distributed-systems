@@ -11,31 +11,30 @@ from wallet import Wallet
 from block import Block, Blockchain
 from transaction import Transaction, TransactionInput
 
-# Set default MINING_DIFFICULTY
 MINING_DIFFICULTY = 5
 
 class Node:
     """
-    A node in the network.
+    Class for a node of the ring
 
-    Attributes:
-        id (int): the id of the node.
-        chain (Blockchain): the blockchain that the node has.
-        wallet (Wallet): the wallet of the node.
-        ring (list): list of information about other nodes
-                     (id, ip, port, public_key, balance).
-        lock (Lock): a lock in order to provide mutual exclution in mining.
-        stop_mining (boolean): True when mining should stop
-                               (when a confirmed block arrives).
-        current_block (Block): the block that the node is fills with
-                               transactions.
-        unconfirmed_blocks (deque): A queue that contains all the blocks
-                                    waiting for mining.
-        capacity (int): max number of transactions in each block.
+    id: id of the node
+    chain: blockchain of the node
+    wallet: wallet of the node
+    ring: information about others (id, ip, port, public_key, balance)
+
+    filter_lock: lock in order to provide mutual exclution while filtering blocks
+    chain_lock: lock in order to provide mutual exclution while updating the chain
+    block_lock: lock in order to provide mutual exclution while updating blocks
+    
+    unconfirmed_blocks: queue that contains all the blocks waiting to be mined
+    current_block: the block that the node currently fills with transactions
+    capacity: max number of transactions in each block
+    stop_mining: flag to stop mining when a confirmed block arrives
     """
 
     def __init__(self):
-        """Inits a Node."""
+        """Initializes a node"""
+        
         self.id = None
         self.chain = Blockchain()
         self.wallet = Wallet()
@@ -51,24 +50,23 @@ class Node:
         self.stop_mining = False
 
     def __str__(self):
-        """Returns a string representation of a Node object."""
+        """String representation of a node"""
+        
         return str(self.__class__) + ": " + str(self.__dict__)
 
     def create_new_block(self):
-        """Creates a new block for the blockchain."""
+        """Create a new block"""
+        
         if len(self.chain.blocks) == 0:
-            # Here, the genesis block is created.
+            # Genesis block
             self.current_block = Block(0, 1)
         else:
-            # They will be updated in mining.
+            # Filled out later
             self.current_block = Block(None, None)
         return self.current_block
 
     def register_node_to_ring(self, id, ip, port, public_key, balance):
-        """Registers a new node in the ring.
-
-        This method is called only in the bootstrap node.
-        """
+        """Registers a new node in the ring, called only by the bootstrap node"""
 
         self.ring.append(
             {
@@ -80,13 +78,9 @@ class Node:
             })
 
     def create_transaction(self, receiver, receiver_id, amount):
-        """Creates a new transaction.
+        """Create a new transaction, after gathering the inputs from the utxos"""
 
-        This method creates a new transaction after computing the input that
-        the transaction should take.
-        """
-        # Fill the input of the transaction with UTXOs, by iterating through
-        # the previous transactions of the node.
+        # Gather the transaction inputs, using utxos of the node
         inputs = []
         inputs_ids = []
         total = 0
@@ -98,13 +92,11 @@ class Node:
                     output.unspent = False
                     total += output.amount
             if total >= amount:
-                # Exit the loop when UTXOs exceeds the amount of
-                # the transaction.
+                # Stop when the total amount is enough
                 break
 
         if total < amount:
-            # If the node don't have enough coins, the possible inputs turn
-            # into unspent again
+            # If there are not enough coins, the utxos are reverted
             for transaction in self.wallet.transactions:
                 for output in transaction.outputs:
                     if output.transaction_id in inputs_ids:
@@ -121,10 +113,10 @@ class Node:
             inputs
         )
 
-        # Sign the transaction
+        # Sign transaction
         transaction.sign_transaction(self.wallet.private_key)
 
-        # Broadcast the transaction to the whole network.
+        # Broadcast transaction 
         broadcast = self.broadcast_transaction(transaction)
         mining_time = broadcast["mining_time"]
         success = broadcast["success"]
@@ -139,29 +131,23 @@ class Node:
         return {"mining_time": mining_time, "success": True}
 
     def add_transaction_to_block(self, transaction):
-        """Add transaction to the block.
+        """Add a transaction to a block, check if mining is needed and update
+        the wallet and balances of participating nodes"""
 
-        This method adds a transaction in the block and checks if the current
-        block is ready to be mined. Also, the wallet transactions and the
-        balance of each node are updated.
-        """
-
-        # If the node is the recipient or the sender of the transaction,
-        # it adds the transaction in its wallet.
+        # Add transaction to the wallet of the sender and the receiver
         if (transaction.sender  == self.wallet.public_key):
             self.wallet.transactions.append(transaction)
         if (transaction.receiver == self.wallet.public_key):
             self.wallet.transactions.append(transaction)
 
-        # Update the balance of the recipient and the sender.
+        # Update the balance of the sender and the receiver
         for ring_node in self.ring:
             if ring_node['public_key'] == transaction.sender:
                 ring_node['balance'] -= transaction.amount
             if ring_node['public_key'] == transaction.receiver:
                 ring_node['balance'] += transaction.amount
 
-        # If the chain contains only the genesis block, a new block
-        # is created. In other cases, the block is created after mining.
+        # If chain has only the genesis block, create new block
         if self.current_block is None:
             self.current_block = self.create_new_block()
 
@@ -169,16 +155,10 @@ class Node:
         if self.current_block.add_transaction_and_check(transaction, self.capacity):
             start_time = time.time()
 
-            # Mining procedure includes:
-            # - add the current block in the queue of unconfirmed blocks.
-            # - wait until the thread gets the lock.
-            # - check that the queue is not empty.
-            # - mine the first block of the queue.
-            # - if mining succeeds, broadcast the mined block.
-            # - if mining fails, put the block back in the queue and wait
-            #   for the lock.
+            # Add the block to the mining queue, create a new one, 
+            # mine the first block of the queue and when mining is done
+            # broadcast the mined block
 
-            # Update previous hash and index in case of insertions in the chain
             self.unconfirmed_blocks.append(deepcopy(self.current_block))
             self.current_block = self.create_new_block()
             self.block_lock.release()
@@ -201,13 +181,8 @@ class Node:
             return 0
 
     def broadcast_transaction(self, transaction):
-        """Broadcasts a transaction to the whole network.
+        """Broadcasts a transaction to the network, utilizing threads"""
 
-        This is called each time a new transaction is created. In order to
-        send the transaction simultaneously, each request is sent by a
-        different thread. If all nodes accept the transaction, the node adds
-        it in the current block.
-        """
         def thread_func(node, responses, endpoint):
             address = 'http://' + node['ip'] + ':' + node['port']
             response = requests.post(address + endpoint,
@@ -240,13 +215,8 @@ class Node:
         return {"mining_time": mining_time, "success": True}
 
     def validate_transaction(self, transaction):
-        """Validates an incoming transaction.
-
-        The validation consists of:
-        - verification of the signature.
-        - check that the transaction inputs are unspent transactions.
-        - create the 2 transaction outputs and add them in UTXOs list.
-        """
+        """Validates an incoming transaction, by checking the signature,
+        the inputs and the outputs"""
 
         if not transaction.verify_signature():
             return False
@@ -258,10 +228,7 @@ class Node:
         return False
 
     def mine_block(self, block):
-        """Implements the proof-of-work.
-
-        This methods implements the proof of work algorithm.
-        """
+        """Implements the proof-of-work algorithm"""
 
         block.nonce = 0
         block.index = self.chain.blocks[-1].index + 1
@@ -274,12 +241,7 @@ class Node:
         return not self.stop_mining
 
     def broadcast_block(self, block):
-        """
-        Broadcasts a validated block in the whole network.
-
-        This method is called each time a new block is mined. If at least
-        one node accepts the block, the node adds the block in the chain.
-        """
+        """Broadcasts a transaction to the network, utilizing threads"""
 
         block_accepted = False
 
@@ -310,37 +272,24 @@ class Node:
                     self.chain.blocks.append(block)
 
     def validate_previous_hash(self, block):
-        """Validates the previous hash of an incoming block.
-
-        The previous hash must be equal to the hash of the previous block in
-        the blockchain.
-        """
+        """Validates the previous hash of an incoming block"""
 
         return block.previous_hash == self.chain.blocks[-1].hash
 
     def validate_block(self, block):
-        """Validates an incoming block.
+        """Validates a block, by validating its hash and its previous hash"""
 
-            The validation consists of:
-            - check that current hash is valid.
-            - validate the previous hash.
-        """
         return self.validate_previous_hash(block) and (block.hash == block.hash_block())
 
     def filter_blocks(self, mined_block):
-        """Filters the queue of the unconfirmed blocks.
-
-        This method is called each time a new block is added in the blockchain.
-        The incoming block may contains transactions that are included in the
-        unconfirmed blocks too. These 'double' transactions are removed from
-        the queue.
-        """
+        """Filters the queue of the unconfirmed blocks, by removing the
+        transactions that are included in a mined block"""
+        
         with self.block_lock:
             total_transactions = list(itertools.chain.from_iterable([
                     unc_block.transactions
                     for unc_block
-                    in self.unconfirmed_blocks
-                ]))
+                    in self.unconfirmed_blocks]))
 
             if (self.current_block):
                 total_transactions.extend(self.current_block.transactions)
@@ -367,20 +316,13 @@ class Node:
         return
 
     def share_ring(self, ring_node):
-        """Shares the node's ring (neighbor nodes) to a specific node.
-
-        This function is called for every newcoming node in the blockchain.
-        """
+        """Share your ring to a specified node"""
 
         address = 'http://' + ring_node['ip'] + ':' + ring_node['port']
         requests.post(address + '/receive_ring', data=pickle.dumps(self.ring))
 
     def validate_chain(self, blocks):
-        """Validates all the blocks of a chain.
-
-        This function is called every time a node receives a chain after
-        a conflict.
-        """
+        """Validates all the blocks of a chain"""
 
         if (blocks[0].previous_hash != 1 or blocks[0].hash != blocks[0].hash_block()):
             return False
@@ -391,27 +333,15 @@ class Node:
         return True
 
     def share_chain(self, ring_node):
-        """Shares the node's current blockchain to a specific node.
-
-        This function is called whenever there is a conflict and the node is
-        asked to send its chain by the ring_node.
-        """
+        """Share your blockchain to a specified node"""
 
         address = 'http://' + ring_node['ip'] + ':' + ring_node['port']
         requests.post(address + '/receive_chain', data=pickle.dumps(self.chain))
 
     def resolve_conflicts(self, new_block):
-        """Resolves conflicts of multiple blockchains.
+        """Resolves conflicts of multiple blockchains, by keeping the longest chain
+        when a new block that can't be validated is received"""
 
-        This function is called when a node receives a block for which it
-        can't validate its previous hash.
-
-        In order to resolve the conflict:
-            - broadcast a request to get the current blockchains
-              of the other nodes.
-            - validate the given blockchains.
-            - keep the longest one.
-        """
         def thread_func(node, chains):
             address = 'http://' + node['ip'] + ':' + node['port']
             response = requests.get(address + "/send_chain")
