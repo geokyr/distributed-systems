@@ -1,66 +1,135 @@
-import json
-import base64
-from collections import OrderedDict
-
+import Crypto
+import Crypto.Random
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
-from Crypto.Signature import pkcs1_15
+from Crypto.Signature import pss
 
 class Transaction:
-    def __init__(self, sender, sender_id, receiver, receiver_id, amount, inputs, outputs=[], id=None, signature=None):
+    """
+    A noobcash transaction in the blockchain
+
+    Attributes:
+        sender (int): the public key of the sender's wallet.
+        sender_id (int): the id of the sender node.
+        receiver (int): the public key of the receiver's wallet.
+        receiver_id (int): the id of the receiver node.
+        amount (int): the amount of nbc to transfer.
+        inputs (list): list of TransactionInput.
+        total (int): the amount of money that the sender send for the transaction.
+        id (int): hash of the transaction.
+        outputs (list): list of TransactionOutput.
+        signature (int): signature that verifies that the owner of the wallet created the transaction.
+    """
+
+    def __init__(self, sender, sender_id, receiver, receiver_id, amount, total, inputs, id=None, outputs=None, signature=None):
+        """Inits a Transaction"""
         self.sender = sender
         self.sender_id = sender_id
         self.receiver = receiver
         self.receiver_id = receiver_id
         self.amount = amount
+        self.total = total
         self.inputs = inputs
-        self.id = id
-        self.outputs = outputs
+
+        if (id):
+            self.id = id
+        else:
+            self.id = self.hash_transaction()
+
+        if (outputs):
+            self.outputs = outputs
+        else:
+            self.calculate_outputs()
+
         self.signature = signature
 
-    def __eq__(self, other):
-        if not isinstance(other, Transaction):
-            return NotImplemented
-        return self.id == other.id
+    def __eq__(self, transaction):
+        """Overrides the default method for comparing Transaction objects.
+
+        Two transactions are equal if their id is equal.
+        """
+        return self.id == transaction.id
+
+    def __str__(self):
+        """Returns a string representation of a Transaction object"""
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    def convert_to_list(self):
+        """Converts a Transaction object into a list."""
+        return [self.sender_id, self.receiver_id, self.amount, self.total, self.total - self.amount]
 
     def hash_transaction(self):
-        temp = OrderedDict([
-            ("sender", self.sender),
-            ("receiver", self.receiver),
-            ("amount", self.amount),
-            ("inputs", self.inputs)
-        ])
-        hashable = json.dumps(temp).encode()
-        return SHA256.new(hashable)
+        """Computes the hash of the transaction."""
+
+        # The hash is a random integer, at most 256 bits long.
+        return Crypto.Random.get_random_bytes(256).decode("ISO-8859-1")
+
+    def calculate_outputs(self):
+        """Compute the outputs of the transaction, if not set.
+
+        The computation includes:
+            - an output for the nbcs sent to the receiver.
+            - an output for the nbcs sent back to the sender as change.
+        """
+
+        self.outputs = [TransactionOutput(self.id, self.receiver, self.amount)]
+
+        if self.total > self.amount:
+            # If there is change for the transaction.
+            self.outputs.append(TransactionOutput(self.id, self.sender, self.total - self.amount))
 
     def sign_transaction(self, private_key):
-        hash = self.hash_transaction()
-        key = RSA.importKey(private_key)
-        signer = pkcs1_15.new(key)
-        self.id = hash.hexdigest()
-        self.signature = base64.b64encode(signer.sign(hash)).decode()
-        return self.signature
+        """Sign the current transaction with the given private key."""
+
+        temp = self.id.encode("ISO-8859-1")
+        key = RSA.importKey(private_key.encode("ISO-8859-1"))
+        hashed = SHA256.new(temp)
+        signer = pss.new(key)
+        self.signature = signer.sign(hashed).decode("ISO-8859-1")
 
     def verify_signature(self):
-        hash = self.hash_transaction()
-        key = RSA.importKey(self.sender.encode())
-        verifier = pkcs1_15.new(key)
+        """Verifies the signature of a transaction."""
+
+        key = RSA.importKey(self.sender.encode("ISO-8859-1"))
+        hashed = SHA256.new(self.id.encode("ISO-8859-1"))
+        verifier = pss.new(key)
         try:
-            verifier.verify(hash, base64.b64decode(self.signature))
+            verifier.verify(hashed, self.signature.encode("ISO-8859-1"))
             return True
         except (ValueError, TypeError):
             return False
 
-# keys = RSA.generate(2048)
-# public_key = keys.publickey().exportKey().decode()
-# private_key = keys.exportKey().decode()
+class TransactionInput:
+    """
+    The transaction input of a noobcash transaction.
 
-# trans = Transaction(public_key, 1, public_key, 2, 10, [1])
-# trans.sign_transaction(private_key)
+    Attributes:
+        output_id (int): id of the transaction that the coins come from.
+    """
 
-# trans.outputs.append({"id": 0, "receiver": public_key, "amount": 0})
-# trans.outputs.append({"id": 0, "receiver": public_key, "amount": 10})
+    def __init__(self, output_id):
+        """Inits a TransactionInput."""
+        self.output_id = output_id
 
-# print(trans.id)
-# print(trans.signature)
-# print(trans.verify_signature())
+
+class TransactionOutput:
+    """
+    A transaction output of a noobcash transaction.
+
+    Attributes:
+        transaction_id (int): id of the transaction.
+        target (int): the target of the transaction.
+        amount (int): the amount of nbcs to be transfered.
+        unspent (boolean): false if this output has been used as input in a transaction.
+    """
+
+    def __init__(self, transaction_id, target, amount):
+        """Inits a TransactionOutput."""
+        self.transaction_id = transaction_id
+        self.target = target
+        self.amount = amount
+        self.unspent = True
+
+    def __str__(self):
+        """Returns a string representation of a TransactionOutput object"""
+        return str(self.__dict__)

@@ -1,62 +1,75 @@
-import time
 import json
-from collections import OrderedDict
+import time
 from Crypto.Hash import SHA256
 
-from parameters import CAPACITY
-
 class Block:
-    def __init__(self, index=-1, previous_hash=None):
+    """
+    A block in the blockchain.
+
+    Attributes:
+        index (int): the sequence number of the block.
+        timestamp (float): timestamp of the creation of the block.
+        transactions (list): list of all the transactions in the block.
+        nonce (int): the solution of proof-of-work.
+        previous_hash (hash object): hash of the previous block in the blockchain.
+        hash (hash object): hash of the block.
+    """
+
+    def __init__(self, index, previous_hash):
+        """Inits a Block"""
         self.index = index
-        self.previous_hash = previous_hash
         self.timestamp = time.time()
-        self.nonce = 0
         self.transactions = []
+        self.nonce = None
+        self.previous_hash = previous_hash
         self.hash = None
-    
-    def transactions_to_serializable(self):
-        serializable = []
-        for transaction in self.transactions:
-            serializable.append(transaction.__dict__)
-        return serializable
+
+    def __str__(self):
+        """Returns a string representation of a Block object"""
+        return str(self.__class__) + ": " + str(self.__dict__)
+
+    def __eq__(self, block):
+        """Overrides the default method for comparing Block objects.
+
+        Two blocks are equal if their hash is equal.
+        """
+        return self.hash == block.hash
+
+    def add_transaction_and_check(self, transaction, capacity):
+        """Adds a new transaction in the block."""
+
+        self.transactions.append(transaction)
+        if len(self.transactions) == capacity:
+            return True
+
+        return False
 
     def hash_block(self):
-        temp = OrderedDict([
-            ("index", self.index),
-            ("previous_hash", self.previous_hash),
-            ("timestamp", self.timestamp),
-            ("nonce", self.nonce),
-            ("transactions", self.transactions_to_serializable())
-        ])
-        hashable = json.dumps(temp).encode()
-        return SHA256.new(hashable).hexdigest()
+        """Computes the current hash of the block."""
 
-    def print_block(self):
-        print(f"_____Block #{str(self.index)}_____")
-        print(f"Timestamp:\t{str(self.timestamp)}")
-        print(f"Nonce:\t\t{str(self.nonce)}")
-        print(f"Transactions:\t")
-        for t in self.transactions:
-            print(f"\t\tSender ID: {str(t.sender_id)}\t\tReceiver ID: {str(t.receiver_id)}\t\tAmount: {str(t.amount)} NBCs")
-            print(f"\t\tHash: {str(t.id)}")
-        print(f"Current Hash:\t{str(self.hash)}")
-        print(f"Previous Hash:\t{str(self.previous_hash)}")
+        # We should compute current hash without using the
+        # field self.hash.
+        block_list = [self.timestamp, [transaction.id for transaction in self.transactions], self.nonce, self.previous_hash]
 
-# from Crypto.PublicKey import RSA
-# from transaction import Transaction
+        block_dump = json.dumps(block_list.__str__())
+        return SHA256.new(block_dump.encode("ISO-8859-1")).hexdigest()
 
-# keys = RSA.generate(2048)
-# public_key = keys.publickey().exportKey().decode()
-# private_key = keys.exportKey().decode()
+class Blockchain:
+    """
+    The blockchain of the noobcash
 
-# trans = Transaction(public_key, 1, public_key, 2, 10, [1])
-# trans.sign_transaction(private_key)
+    Attributes:
+        blocks (list): list that contains the validated blocks of the chain.
+    """
 
-# trans.outputs.append({"id": 0, "receiver": public_key, "amount": 0})
-# trans.outputs.append({"id": 0, "receiver": public_key, "amount": 10})
+    def __init__(self):
+        """Inits a Blockchain"""
+        self.blocks = []
 
-# block = Block(0, 1)
-# block.transactions.append(trans)
+    def __str__(self):
+        """Returns a string representation of a Blockchain object"""
+        return str(self.__class__) + ": " + str(self.__dict__)
 
-# block.hash = block.hash_block()
-# block.print_block()
+    def add_block(self, block):
+        """Adds a new block in the chain."""
+        self.blocks.append(block)
