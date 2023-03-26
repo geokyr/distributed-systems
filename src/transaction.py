@@ -60,13 +60,13 @@ class Transaction:
         return [self.sender_id, self.receiver_id, self.amount, self.total, self.total - self.amount]
 
     def hash_transaction(self):
-        """Calculate the hash of the Τransaction"""
+        """Calculates the hash of the Transaction"""
 
         # The hash is a random integer, at most 256 bits long.
         return Crypto.Random.get_random_bytes(256).decode("ISO-8859-1")
 
     def calculate_outputs(self):
-        """Compute Transaction outputs"""
+        """Computes Transaction outputs"""
 
         self.outputs = [TransactionOutput(self.id, self.receiver, self.amount)]
 
@@ -75,7 +75,7 @@ class Transaction:
             self.outputs.append(TransactionOutput(self.id, self.sender, self.total - self.amount))
 
     def sign_transaction(self, private_key):
-        """Sign the Transaction using a private key"""
+        """Signs the Transaction using a private key"""
 
         temp = self.id.encode("ISO-8859-1")
         key = RSA.importKey(private_key.encode("ISO-8859-1"))
@@ -84,7 +84,7 @@ class Transaction:
         self.signature = signer.sign(hashed).decode("ISO-8859-1")
 
     def verify_signature(self):
-        """Verify the signature of a Transaction"""
+        """Verifies the signature of a Transaction"""
 
         key = RSA.importKey(self.sender.encode("ISO-8859-1"))
         hashed = SHA256.new(self.id.encode("ISO-8859-1"))
@@ -113,7 +113,7 @@ class TransactionOutput:
     Class for a TransactionOutput of a Transaction
 
     transaction_id: id of the transaction
-    target: target of the TranscationOutput
+    target: target of the TransactionOutput
     amount: amount of nbc to be credited to the target
     unspent: boolean of whether this output has been used or not
     """

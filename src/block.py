@@ -36,7 +36,8 @@ class Block:
         return self.hash == block.hash
 
     def add_transaction_and_check(self, transaction, capacity):
-        """Adds a new transaction in the Block"""
+        """Adds a new transaction in the Block and checks if the Block has
+        reached its capacity"""
 
         self.transactions.append(transaction)
         if len(self.transactions) == capacity:
@@ -68,8 +69,3 @@ class Blockchain:
         """String representation of a Blockchain"""
 
         return str(self.__class__) + ": " + str(self.__dict__)
-
-    def add_block(self, block):
-        """Adds a new block in the chain"""
-
-        self.blocks.append(block)

@@ -1,0 +1,29 @@
+Throughput: 0.756692
+Block time: 0.000000
+Capacity: 10
+Difficulty: 4
+
+Throughput: 0.400211
+Block time: 0.198459
+Capacity: 5
+Difficulty: 4
+
+Throughput: 0.128621
+Block time: 0.024650
+Capacity: 1
+Difficulty: 4
+
+Throughput: 0.054780
+Block time: 2.851147
+Capacity: 10
+Difficulty: 5
+
+Throughput: 0.040909
+Block time: 0.149885
+Capacity: 5
+Difficulty: 5
+
+Throughput: 0.019963
+Block time: 0.444445
+Capacity: 1
+Difficulty: 5

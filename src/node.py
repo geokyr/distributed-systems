@@ -22,9 +22,9 @@ class Node:
     wallet: wallet of the node
     ring: information about others (id, ip, port, public_key, balance)
 
-    filter_lock: lock in order to provide mutual exclution while filtering blocks
-    chain_lock: lock in order to provide mutual exclution while updating the chain
-    block_lock: lock in order to provide mutual exclution while updating blocks
+    filter_lock: lock in order to provide mutual exclusion while filtering blocks
+    chain_lock: lock in order to provide mutual exclusion while updating the chain
+    block_lock: lock in order to provide mutual exclusion while updating blocks
     
     unconfirmed_blocks: queue that contains all the blocks waiting to be mined
     current_block: the block that the node currently fills with transactions
@@ -55,7 +55,7 @@ class Node:
         return str(self.__class__) + ": " + str(self.__dict__)
 
     def create_new_block(self):
-        """Create a new block"""
+        """Creates a new block"""
         
         if len(self.chain.blocks) == 0:
             # Genesis block
@@ -78,7 +78,7 @@ class Node:
             })
 
     def create_transaction(self, receiver, receiver_id, amount):
-        """Create a new transaction, after gathering the inputs from the utxos"""
+        """Creates a new transaction, after gathering the inputs from the utxos"""
 
         # Gather the transaction inputs, using utxos of the node
         inputs = []
@@ -131,7 +131,7 @@ class Node:
         return {"mining_time": mining_time, "success": True}
 
     def add_transaction_to_block(self, transaction):
-        """Add a transaction to a block, check if mining is needed and update
+        """Adds a transaction to a block, check if mining is needed and update
         the wallet and balances of participating nodes"""
 
         # Add transaction to the wallet of the sender and the receiver
@@ -316,7 +316,7 @@ class Node:
         return
 
     def share_ring(self, ring_node):
-        """Share your ring to a specified node"""
+        """Shares your ring to a specified node"""
 
         address = 'http://' + ring_node['ip'] + ':' + ring_node['port']
         requests.post(address + '/receive_ring', data=pickle.dumps(self.ring))
@@ -333,7 +333,7 @@ class Node:
         return True
 
     def share_chain(self, ring_node):
-        """Share your blockchain to a specified node"""
+        """Shares your blockchain to a specified node"""
 
         address = 'http://' + ring_node['ip'] + ':' + ring_node['port']
         requests.post(address + '/receive_chain', data=pickle.dumps(self.chain))

@@ -56,8 +56,7 @@ if __name__ == '__main__':
     required.add_argument('-p', type=int, help='port to listen on', required=True)
     required.add_argument('-n', type=int, help='number of nodes in the blockchain', required=True)
     required.add_argument('-c', type=int, help='capacity of a block', required=True)
-    optional.add_argument('-b', '--bootstrap', action='store_true',
-                          help='set if the current node is the bootstrap')
+    optional.add_argument('-b', '--bootstrap', action='store_true', help='set if the current node is the bootstrap')
     
     args = parser.parse_args()
     port = args.p

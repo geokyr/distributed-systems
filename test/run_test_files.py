@@ -108,8 +108,8 @@ if __name__ == "__main__":
     parser = ArgumentParser(description='Sends transactions in the noobcash blockchain given from a text file.')
 
     required = parser.add_argument_group('required arguments')
-    required.add_argument('-d', help='Path to the directory of the transactions', required=True)
-    required.add_argument('-p', type=int, help='Port that the api is listening on', required=True)
+    required.add_argument('-d', help='path to the directory of the transactions', required=True)
+    required.add_argument('-p', type=int, help='port that the api is listening on', required=True)
 
     # Parse the given arguments.
     args = parser.parse_args()

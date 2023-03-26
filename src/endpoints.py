@@ -10,13 +10,13 @@ from node import Node
 node = Node()
 n = 0
 
-# Define a Blueprint for the api endpoints to use on the rest.py file
+# Define a Blueprint for the api endpoints to use on the main.py file
 rest_api = Blueprint('rest_api', __name__)
 
 
 @rest_api.route('/register_node', methods=['POST'])
 def register_node():
-    '''Register a new node in the network, called only by the bootstrap node'''
+    '''Registers a new node in the network, called only by the bootstrap node'''
 
     # Get the arguments
     node_key = request.form.get('public_key')
@@ -47,7 +47,7 @@ def register_node():
 
 @rest_api.route('/validate_transaction', methods=['POST'])
 def validate_transaction():
-    '''Validate an incoming transaction'''
+    '''Validates an incoming transaction'''
 
     new_transaction = pickle.loads(request.get_data())
     if node.validate_transaction(new_transaction):
@@ -58,7 +58,7 @@ def validate_transaction():
 
 @rest_api.route('/receive_transaction', methods=['POST'])
 def receive_transaction():
-    '''Receive a transaction and add it to a block'''
+    '''Receives a transaction and add it to a block'''
 
     new_transaction = pickle.loads(request.get_data())
     node.add_transaction_to_block(new_transaction)
@@ -68,7 +68,7 @@ def receive_transaction():
 
 @rest_api.route('/receive_block', methods=['POST'])
 def receive_block():
-    '''Receive a block, validate it and add it to the blockchain'''
+    '''Receives a block, validate it and add it to the blockchain'''
     
     new_block = pickle.loads(request.get_data())
     node.chain_lock.acquire()
@@ -107,7 +107,7 @@ def receive_block():
 
 @rest_api.route('/receive_ring', methods=['POST'])
 def receive_ring():
-    '''Receive the ring from bootstrap'''
+    '''Receives the ring from bootstrap'''
     
     node.ring = pickle.loads(request.get_data())
     # Update the id of the node based on the given ring
@@ -119,7 +119,7 @@ def receive_ring():
 
 @rest_api.route('/receive_chain', methods=['POST'])
 def receive_chain():
-    '''Receive the blockchain'''
+    '''Receives the blockchain'''
 
     node.chain = pickle.loads(request.get_data())
     return jsonify({'message': "OK"})
@@ -127,14 +127,14 @@ def receive_chain():
 
 @rest_api.route('/send_chain', methods=['GET'])
 def send_chain():
-    '''Send your chain to another node'''
+    '''Sends your chain to another node'''
     
     return pickle.dumps(node.chain)
 
 
 @rest_api.route('/api/create_transaction', methods=['POST'])
 def create_transaction():
-    '''Create a new transaction'''
+    '''Creates a new transaction'''
 
     # Get the arguments
     receiver_id = int(request.form.get('receiver'))
@@ -157,27 +157,27 @@ def create_transaction():
 
 @rest_api.route('/api/get_balance', methods=['GET'])
 def get_balance():
-    '''Get balance of the node'''
+    '''Gets balance of the node'''
     
     return jsonify({'message': 'Current balance: ', 'balance': node.wallet.wallet_balance()})
 
 
 @rest_api.route('/api/get_transactions', methods=['GET'])
 def get_transactions():
-    '''Get transactions of the last confirmed block'''
+    '''Gets transactions of the last confirmed block'''
     
     return pickle.dumps([tr.convert_to_list() for tr in node.chain.blocks[-1].transactions])
 
 
 @rest_api.route('/api/get_id', methods=['GET'])
 def get_id():
-    '''Get id of the node'''
+    '''Gets id of the node'''
 
     return jsonify({'message': node.id})
 
 
 @rest_api.route('/api/get_metrics', methods=['GET'])
 def get_metrics():
-    '''Get metrics of the network'''
+    '''Gets metrics of the network'''
 
     return jsonify({'num_blocks': len(node.chain.blocks), 'difficulty': MINING_DIFFICULTY, 'capacity': node.capacity})
