@@ -2,7 +2,7 @@
 
 if [ $# -ne 1 ]
 then
-    echo "Usage: $0 <first_machine_number>"
+    echo "Usage: $0 <first_machine_number>, will scp to this and the next 4 machines"
     exit 1
 fi
 

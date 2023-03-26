@@ -13,8 +13,8 @@ Block time: 0.046657
 Capacity: 1
 Difficulty: 4
 
-Throughput: Missing
-Block time: Missing
+Throughput: 0.061788
+Block time: 2.324066
 Capacity: 10
 Difficulty: 5
 
