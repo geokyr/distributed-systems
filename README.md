@@ -88,4 +88,4 @@ The `-d` flag is used to specify the directory that contains the sample transact
 
 We ran some experiments on our blockchain, testing different combinations of block capacity and mining difficulty. These tests were conducted to measure the system's performance using two metrics, throughput and block times. We also tested the scalability of our system, by running the blockchain with 5 and 10 nodes in the network.
 
-The results of these experiments, accompanied by some comparison graphs, our comments and a final conclusion are available on the project report - `noobcash-team1.pdf`.our
+The results of these experiments, accompanied by some comparison graphs, our comments and a final conclusion are available on the project report - `noobcash-team1.pdf`.
