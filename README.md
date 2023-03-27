@@ -55,7 +55,7 @@ The blockchain system is implemented using Python3.8, with the help of the [Flas
 
 An outline of the code structure is available on the project report - `noobcash-team1.pdf`. There, the different Python classes, instance variables and instance methods are listed and briefly explained. You can also find a short description of the REST API's endpoints and the client's available commands.
 
-## How to Run and Test
+## Running the Project
 
 ### REST API
 
