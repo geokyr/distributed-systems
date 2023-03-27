@@ -35,7 +35,7 @@ el18849@mail.ntua.gr}
 \maketitle
 
 \begin{abstract}
-The Noobcash project is a python-based \cite{b2} implementation of a blockchain system designed to facilitate secure and decentralized transactions without the need for a central authority. The system achieves this by utilizing a distributed database, which ensures that all nodes within the network have access to the same information and can verify the validity of any transactions. As part of the project's development, several experiments were conducted to analyze the system's performance in terms of throughput and block times under varying conditions. These experiments involved testing different combinations of block capacity and mining difficulty levels. Additionally, the scalability of the system was tested by increasing the number of nodes within the network from 5 to 10. Through these experiments, valuable insights were gained into the system's behavior under different conditions, which can inform future improvements and developments in blockchain technology.
+The Noobcash project is a blockchain system designed to facilitate secure and decentralized transactions without the need for a central authority, implemented in Python \cite{b1}. The system achieves this by utilizing a distributed database, which ensures that all nodes within the network have access to the same information and can verify the validity of any transaction. As part of the project's development, several experiments were conducted to analyze the system's performance in terms of throughput and block times under varying conditions. These experiments involved testing different combinations of block capacity and mining difficulty. Additionally, the scalability of the system was tested by increasing the number of nodes within the network from 5 to 10. Through these experiments, valuable insights were gained into the system's behavior under different conditions, which can inform future improvements and developments in blockchain technology.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,14 +47,14 @@ Blockchain technology has become increasingly popular in recent years due to its
 
 The Noobcash project is a python-based implementation of a blockchain system that aims to provide a basic but functional example of a blockchain system. The system uses Proof-of-Work to ensure consensus between nodes, and it is designed to enable secure and decentralized transactions between users without the need for a central authority. Thorough explanation about the implementation of the system and how it works are provided in an upcoming section.
 
-As part of the project's development, a series of experiments were conducted to analyze the system's performance under different conditions. These experiments included testing different combinations of block capacity and mining difficulty levels to determine the system's throughput and block times. Additionally, the scalability of the system was tested by increasing the number of nodes within the network from 5 to 10.
+As part of the project's development, a series of experiments were conducted to analyze the system's performance under different conditions. These experiments included testing different combinations of block capacity and mining difficulty to determine the system's throughput and block times. Additionally, the scalability of the system was tested by increasing the number of nodes within the network from 5 to 10.
 
-This paper is backed by a GitHub repository \cite{b5} \cite{b6}, which contains the source code of the system, the scripts used for installation and testing, as well as analytics for the results.
+This paper is backed by a GitHub repository \cite{b2} \cite{b3}, which contains the source code of the system, the scripts used for installation and testing, as well as analytics for the results.
 
 \section{\textbf{Setup}}
 In this section, we outline a brief explanation of the setup that was utilized to run the blockchain and the experiments.
 
-We used the okeanos IAAS \cite{b1}, which is GRNET's cloud service, for the Greek Research and Academic Community, to acquire 5 virtual machines for our study. Each machine has the same following specifications:
+We used the okeanos IAAS \cite{b4}, which is GRNET's cloud service, for the Greek Research and Academic Community, to acquire 5 virtual machines for our study. Each machine has the same following specifications:
 
 \begin{itemize}
 \item CPU: 2 Cores - Intel\textregistered\ Xeon\textregistered\ CPU E5-2650 v3
@@ -65,7 +65,7 @@ We used the okeanos IAAS \cite{b1}, which is GRNET's cloud service, for the Gree
 
 Those 5 machines were used to set up a 5-node cluster. We also set up a local network (192.168.2.0/24) so that the 5 nodes could communicate with each other. After setting up our machines, we used SSH in order to connect and have access to them and proceed with the configuration.
 
-We then installed Python3.8 \cite{b2} by building it from source and pip \cite{b3} using a script for all nodes. At that point, we were ready to proceed with the implementation of our blockchain system in Python.
+We then installed Python3.8 \cite{b1} by building it from source and pip \cite{b5} using a script for all nodes. At that point, we were ready to proceed with the implementation of our blockchain system in Python.
 
 \section{\textbf{Implementation}}
 We developed our blockchain source code by dividing it into several Python classes. The classes we used are:
@@ -234,8 +234,8 @@ The REST API we developed utilizes the endpoints below:
 \end{itemize}
 
 \subsection{Noobcash Client}
-To develop a client for our blockchain, we opted for a simple CLI client, using the PyInquirer module \cite{b4}.
-The client has the following functions available:
+To develop a client for our blockchain, we opted for a simple CLI client, using the PyInquirer module \cite{b6}.
+The client has the following commands available:
 
 \begin{itemize}
 \item \textbf{new transaction}: create a new transaction, specifying the amount of NBC coins to send and the receiver's id
@@ -250,25 +250,30 @@ We have also implemented a \verb|main.py| file that starts the REST API on the n
 More specifically, when running the \verb|main.py| file, the following arguments can be defined:
 
 \begin{itemize}
-\item \textbf{-n} \verb|<port>|: port to listen on
+\item \textbf{-p} \verb|<port>|: port to listen on
 \item \textbf{-n} \verb|<number-of-nodes>|: number of nodes in the blockchain
 \item \textbf{-c} \verb|<capacity>|: capacity of a block
-\item \textbf{-b}: set if current node is the bootstrap
+\item \textbf{-b}: flag that is set if current node is the bootstrap
 \end{itemize}
 
 The first 3 arguments are required for every node, while the last one should only be set on the bootstrap node (the first one on the network).
 
 In the case of the bootstrap node, it registers itself on the ring, creates the genesis block and the first transaction, adds it in the genesis block and then waits for other nodes to join. When another node initializes, it sends a request to the bootstrap node to be registered on the ring. When all nodes have joined, the bootstrap node broadcasts the ring, the blockchain up to that point and also sends each node 100 NBC coins.
 
-Then, the noobcash client (CLI) can be used to interact with the blockchain (creating transactions, checking the balance etc), or a script that runs a few sample transactions named \verb|run_test_files.py| can be used, to test the system. This script, can start on any node and will run 100 transactions sending NBC coins to other nodes. It requires a \textbf{-d} \verb|<directory>| command line argument, specifying the path to the directory of the transactions and a  
-\textbf{-p} \verb|<port>|, specifying the port that the REST API is listening on that node.
+Bear in mind that in the case of a network with 5 nodes, each machine needs to run the REST API once, using the \verb|main.py| file on a port of choice (default 5000). However, if the number of nodes is 10, then each machine needs to run the REST API twice, on two different ports (e.g. 5000 and 6000). These 2 different ports are used to distinguish between the two nodes that need to run on the same machine.
+
+Then, the noobcash client (CLI) can be used to interact with the blockchain (creating transactions, checking the balance etc), or a script that runs a few sample transactions may be executed, to test the system. 
+
+The client can be run by executing the \verb|noobcash.py| file, specifying the \textbf{-p} \verb|<port>| argument, which is the port that the REST API is listening on that node. The client will then ask the user to input a command, which can be one of the above mentioned commands.
+
+The test script can be used on any node by executing the \verb|run_test_files.py| file and will run 100 transactions sending NBC coins to other nodes. It requires a \textbf{-d} \verb|<directory>| command line argument, specifying the path to the directory of the transactions and a \textbf{-p} \verb|<port>|, specifying the port that the REST API is listening on that node.
 
 \section{\textbf{Experiments}}
 \subsection{Metrics}
-We ran some experiments on our blockchain, testing different combinations of block capacity and mining difficulty levels. These tests were conducted to measure the system's performance using two metrics, throughput and block times. We also tested the scalability of our system, by running the blockchain with 5 and 10 nodes in the network.
+We ran some experiments on our blockchain, testing different combinations of block capacity and mining difficulty. These tests were conducted to measure the system's performance using two metrics, throughput and block times. We also tested the scalability of our system, by running the blockchain with 5 and 10 nodes in the network.
 
 \subsection{Graphs}
-The results of the above tests can be summarized in the following graphs. The first graph is comparing the throughput for 5 and 10 nodes based on the different configurations of block capacity and mining difficulty levels. The second graph is doing the same but for block time. The next two graphs provide a clearer view of how the scaling of the system's number of nodes affects the throughput and block time.
+The results of the above tests can be summarized in the following graphs. The first graph is comparing the throughput for 5 and 10 nodes based on the different configurations of block capacity and mining difficulty. The second graph is doing the same but for block time. The next two graphs provide a clearer view of how the scaling of the system's number of nodes affects the throughput and block time.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=0.5\textwidth]{throughput-capacity-difficulty.png}}
@@ -310,12 +315,12 @@ Based on the experiments conducted on the blockchain system, it is evident that 
 Overall, these experiments highlight the importance of carefully optimizing the block capacity, mining difficulty, and network infrastructure to achieve optimal performance in a blockchain system.
 
 \begin{thebibliography}{00}
-\bibitem{b1} “~Okeanos,” ~okeanos Dashboard. [Online]. Available: https://accounts.okeanos.grnet.gr/.
-\bibitem{b2} “Welcome to Python.org,” Python.org. [Online]. Available: https://www.python.org/.
-\bibitem{b3} “Pip,” PyPI. [Online]. Available: https://pypi.org/project/pip/.
-\bibitem{b4} “Pyinquirer,” PyPI. [Online]. Available: https://pypi.org/project/PyInquirer/.
-\bibitem{b5} G. Kyriakopoulos, E. Tsertou, S. Tzelepis, “geokyr/ntua-distributed-systems: Blockchain project in Python. Noobcash is a simple blockchain system that records transactions between participants and ensures consensus using Proof-of-Work,” GitHub. [Online]. Available: https://github.com/geokyr/ntua-distributed-systems.
-\bibitem{b6} S. Tzelepis, “SerTze/ntua-distributed-systems: Blockchain project in Python. Noobcash is a simple blockchain system that records transactions between participants and ensures consensus using Proof-of-Work,” GitHub. [Online]. Available: https://github.com/SerTze/ntua-distributed-systems.
+\bibitem{b1} “Welcome to Python.org,” Python.org. [Online]. Available: https://www.python.org/.
+\bibitem{b2} G. Kyriakopoulos, E. Tsertou, S. Tzelepis, “geokyr/ntua-distributed-systems: Simple blockchain system project in Python, that records transactions between participants and ensures consensus using Proof-of-Work for the Distributed Systems course at ECE NTUA,” GitHub. [Online]. Available: https://github.com/geokyr/ntua-distributed-systems.
+\bibitem{b3} S. Tzelepis, “SerTze/ntua-distributed-systems: Blockchain project in Python. Noobcash is a simple blockchain system that records transactions between participants and ensures consensus using Proof-of-Work,” GitHub. [Online]. Available: https://github.com/SerTze/ntua-distributed-systems.
+\bibitem{b4} “~Okeanos,” ~okeanos Dashboard. [Online]. Available: https://accounts.okeanos.grnet.gr/.
+\bibitem{b5} “Pip,” PyPI. [Online]. Available: https://pypi.org/project/pip/.
+\bibitem{b6} “Pyinquirer,” PyPI. [Online]. Available: https://pypi.org/project/PyInquirer/.
 \end{thebibliography}
 
 \end{document}

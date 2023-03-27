@@ -83,8 +83,8 @@ def start_transactions():
         throughput = num_transactions/total_time
         block_time = total_mining_time/num_blocks
 
-        # with open('./5node' + str(node_id) + '.txt', 'a') as f:
-        with open('./10node' + str(node_id), 'a') as f:
+        # with open('./results/5node' + str(node_id) + '.txt', 'a') as f:
+        with open('./results/10node' + str(node_id) + '.txt', 'a') as f:
             f.write('------------------------\n')
             f.write('Final results for node %d\n' %node_id)
             f.write('------------------------\n')
