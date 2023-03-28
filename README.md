@@ -53,7 +53,7 @@ pip install -r requirements.txt
 
 The blockchain system is implemented using Python3.8, with the help of the [Flask](https://flask.palletsprojects.com/en/2.2.x/) framework for the REST API and the [PyInquirer](https://pypi.org/project/PyInquirer/) module for the client. The blockchain system is using a REST API to handle calls between the nodes and a client in the form of a CLI (command-like interface) is also available, both under the `src/` directory. There is also a Python script that can be used to test the system with some sample transactions, under the `test/` directory, together with the directory containing the sample transactions.`
 
-An outline of the code structure is available on the project report - `noobcash-team1.pdf`. There, the different Python classes, instance variables and instance methods are listed and briefly explained. You can also find a short description of the REST API's endpoints and the client's available commands.
+An outline of the code structure is available on the project report. There, the different Python classes, instance variables and instance methods are listed and briefly explained. You can also find a short description of the REST API's endpoints and the client's available commands.
 
 ## Running the Project
 
@@ -88,4 +88,4 @@ The `-d` flag is used to specify the directory that contains the sample transact
 
 We ran some experiments on our blockchain, testing different combinations of block capacity and mining difficulty. These tests were conducted to measure the system's performance using two metrics, throughput and block times. We also tested the scalability of our system, by running the blockchain with 5 and 10 nodes in the network.
 
-The results of these experiments, accompanied by some comparison graphs, our comments and a final conclusion are available on the project report - `noobcash-team1.pdf`.
+The results of these experiments, accompanied by some comparison graphs, our comments and a final conclusion are available on the project report.
