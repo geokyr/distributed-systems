@@ -11,7 +11,7 @@ from wallet import Wallet
 from block import Block, Blockchain
 from transaction import Transaction, TransactionInput
 
-MINING_DIFFICULTY = 5
+MINING_DIFFICULTY = 4
 
 class Node:
     """
