@@ -16,7 +16,7 @@ As part of the project's development, several experiments were conducted to anal
 
 ## Setup
 
-Setup instructions are available on the project report. It mainly involves setting up a 5 node cluster, installing Python3.8, pip and the required dependencies or modules.
+Setup instructions are available on the project report. It mainly involves setting up a 5 node cluster, installing [Python3.8](https://www.python.org/downloads/release/python-380/), [pip](https://pypi.org/project/pip/) and the required dependencies or modules.
 
 We used [~okeanos](https://astakos.okeanos-knossos.grnet.gr/ui/landing) to set up the cluster, which consists of 5 different virtual machines. Each one hosts either 1 or 2 nodes, depending on if we want to run the blockchain system with 5 or 10 nodes. The first node of the cluster is the bootstrap node, which is responsible for initializing the network and connecting the other nodes to it. The other nodes are responsible for mining blocks and verifying transactions, which is the case with the bootstrap node after the network has been initialized.
 
