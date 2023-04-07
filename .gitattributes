@@ -1,1 +1,2 @@
 *.cls linguist-vendored
+*.ipynb linguist-language=Python
