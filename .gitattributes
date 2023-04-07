@@ -1,1 +1,2 @@
 *.cls linguist-language=Text
+*.ipynb linguist-language=python
