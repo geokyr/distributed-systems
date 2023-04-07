@@ -1,2 +1,2 @@
-*.cls linguist-language=Text
+*.cls linguist-vendored
 *.ipynb linguist-language=python
