@@ -1,3 +1,4 @@
+#!/bin/false
 %%
 %% IEEEtran.cls 2015/08/26 version V1.8b
 %% 
