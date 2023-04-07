@@ -1,2 +1,2 @@
-report/IEEEtran.cls linguist-vendored
-analytics/analytics.ipynb linguist-vendored
+report/* linguist-vendored
+analytics/* linguist-vendored
