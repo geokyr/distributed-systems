@@ -16,9 +16,9 @@ As part of the project's development, several experiments were conducted to anal
 
 ## Setup
 
-Setup instructions are available on the project report. It mainly involves setting up a 5 node cluster, installing [Python3.8](https://www.python.org/downloads/release/python-380/), [pip](https://pypi.org/project/pip/) and the required dependencies or modules.
+Setup instructions are available on the project report. It mainly involves setting up a 5 node cluster, installing [**Python3.8**](https://www.python.org/downloads/release/python-380/), [**pip**](https://pypi.org/project/pip/) and the required dependencies or modules.
 
-We used [~okeanos](https://astakos.okeanos-knossos.grnet.gr/ui/landing) to set up the cluster, which consists of 5 different virtual machines. Each one hosts either 1 or 2 nodes, depending on if we want to run the blockchain system with 5 or 10 nodes. The first node of the cluster is the bootstrap node, which is responsible for initializing the network and connecting the other nodes to it. The other nodes are responsible for mining blocks and verifying transactions, which is the case with the bootstrap node after the network has been initialized.
+We used [**~okeanos**](https://astakos.okeanos-knossos.grnet.gr/ui/landing) to set up the cluster, which consists of 5 different virtual machines. Each one hosts either 1 or 2 nodes, depending on if we want to run the blockchain system with 5 or 10 nodes. The first node of the cluster is the bootstrap node, which is responsible for initializing the network and connecting the other nodes to it. The other nodes are responsible for mining blocks and verifying transactions, which is the case with the bootstrap node after the network has been initialized.
 
 ## SSH
 
@@ -27,11 +27,11 @@ We used SSH to connect to the nodes of the cluster. We also set up passwordless 
     ssh-keygen
     ssh-copy-id <user>@<remote-node>
 
-Finally, we used the `remote-scp.sh` script, located under the `scripts/` directory, to copy any directory or file from a local machine to the remote nodes. This script is suited for the virtual machine names that the [~okeanos](https://astakos.okeanos-knossos.grnet.gr/ui/landing) service provides and needs the 5 digits that are in the first machine's name, copying the files to this and the next 4 machines (it supposes that the 5 machines have sequential digits on their names).
+Finally, we used the `remote-scp.sh` script, located under the `scripts/` directory, to copy any directory or file from a local machine to the remote nodes. This script is suited for the virtual machine names that the [**~okeanos**](https://astakos.okeanos-knossos.grnet.gr/ui/landing) service provides and needs the 5 digits that are in the first machine's name, copying the files to this and the next 4 machines (it supposes that the 5 machines have sequential digits on their names).
 
 ## Cluster
 
-To update the hosts file, we used the `hosts.sh` script, located under the `scripts/` directory. This script updates the hosts file of each node with the IP addresses of the other nodes in the cluster, based on the local network we set up for the cluster (192.168.2.0/24), through the [~okeanos](https://astakos.okeanos-knossos.grnet.gr/ui/landing) service.
+To update the hosts file, we used the `hosts.sh` script, located under the `scripts/` directory. This script updates the hosts file of each node with the IP addresses of the other nodes in the cluster, based on the local network we set up for the cluster (192.168.2.0/24), through the [**~okeanos**](https://astakos.okeanos-knossos.grnet.gr/ui/landing) service.
 
 ## Python
 
@@ -48,7 +48,7 @@ To install the dependencies on the rest of the machines, we used the following c
 
 ## Implementation
 
-The blockchain system is implemented using Python3.8, with the help of the [Flask](https://flask.palletsprojects.com/en/2.2.x/) framework for the REST API and the [PyInquirer](https://pypi.org/project/PyInquirer/) module for the client. The blockchain system is using a REST API to handle calls between the nodes and a client in the form of a CLI (command-like interface) is also available, both under the `src/` directory. There is also a Python script that can be used to test the system with some sample transactions, under the `test/` directory, together with the directory containing the sample transactions.
+The blockchain system is implemented using Python3.8, with the help of the [**Flask**](https://flask.palletsprojects.com/en/2.2.x/) framework for the REST API and the [**PyInquirer**](https://pypi.org/project/PyInquirer/) module for the client. The blockchain system is using a REST API to handle calls between the nodes and a client in the form of a CLI (command-like interface) is also available, both under the `src/` directory. There is also a Python script that can be used to test the system with some sample transactions, under the `test/` directory, together with the directory containing the sample transactions.
 
 An outline of the code structure is available on the project report. There, the different Python classes, instance variables and instance methods are listed and briefly explained. You can also find a short description of the REST API's endpoints and the client's available commands.
 
