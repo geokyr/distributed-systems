@@ -27,7 +27,6 @@ We used SSH to connect to the nodes of the cluster. We also set up passwordless 
     ssh-keygen
     ssh-copy-id <user>@<remote-node>
 
-
 Finally, we used the `remote-scp.sh` script, located under the `scripts/` directory, to copy any directory or file from a local machine to the remote nodes. This script is suited for the virtual machine names that the [~okeanos](https://astakos.okeanos-knossos.grnet.gr/ui/landing) service provides and needs the 5 digits that are in the first machine's name, copying the files to this and the next 4 machines (it supposes that the 5 machines have sequential digits on their names).
 
 ## Cluster
@@ -43,15 +42,13 @@ To download and install the required dependencies, we used the `requirements.txt
     cd src
     pip freeze > requirements.txt
 
-
 To install the dependencies on the rest of the machines, we used the following command, after having copied the file to them:
 
     pip install -r requirements.txt
 
-
 ## Implementation
 
-The blockchain system is implemented using Python3.8, with the help of the [Flask](https://flask.palletsprojects.com/en/2.2.x/) framework for the REST API and the [PyInquirer](https://pypi.org/project/PyInquirer/) module for the client. The blockchain system is using a REST API to handle calls between the nodes and a client in the form of a CLI (command-like interface) is also available, both under the `src/` directory. There is also a Python script that can be used to test the system with some sample transactions, under the `test/` directory, together with the directory containing the sample transactions.`
+The blockchain system is implemented using Python3.8, with the help of the [Flask](https://flask.palletsprojects.com/en/2.2.x/) framework for the REST API and the [PyInquirer](https://pypi.org/project/PyInquirer/) module for the client. The blockchain system is using a REST API to handle calls between the nodes and a client in the form of a CLI (command-like interface) is also available, both under the `src/` directory. There is also a Python script that can be used to test the system with some sample transactions, under the `test/` directory, together with the directory containing the sample transactions.
 
 An outline of the code structure is available on the project report. There, the different Python classes, instance variables and instance methods are listed and briefly explained. You can also find a short description of the REST API's endpoints and the client's available commands.
 
@@ -63,7 +60,6 @@ To see the blockchain system in action, every node needs to start its REST API o
 
     python3.8 main.py -p <port> -n <number-of-nodes> -c <capacity> -b
 
-
 The `-p` flag is used to specify the port on which the REST API will run, while the `-n` flag is used to specify the number of nodes in the network. The `-c` flag is used to specify the block capacity, which is the maximum number of transactions that can be included in a block. The `-b` flag is optionally used to specify that the node is the bootstrap node, and should only be set on the bootstrap node (the first one on the network).
 
 ### CLI Client
@@ -72,7 +68,6 @@ After the REST API is running on every node, the client can be used to interact 
 
     python3.8 noobcash.py -p <port>
 
-
 The `-p` flag is used to specify the port on which the REST API is listening on that node. The user can then select a command and enter the required arguments if needed to interact with the blockchain system.
 
 ### Testing
@@ -80,7 +75,6 @@ The `-p` flag is used to specify the port on which the REST API is listening on 
 To test the blockchain system, we used the `run_test_files.py` script, located under the `test/` directory. This script sends 100 transactions to the blockchain system, coming from the node that the script is executed on. The script can be run with the following command:
 
     python3.8 run_test_files.py -d <transactions-directory> -p <port>
-
 
 The `-d` flag is used to specify the directory that contains the sample transactions (e.g. `transactions/5nodes`), while the `-p` flag is used to specify the port on which the REST API is listening on that node.
 
