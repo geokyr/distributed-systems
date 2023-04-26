@@ -4,9 +4,9 @@ This repository is for the project of the Distributed Systems course during the 
 
 ## Team 1 - Members
 
-* [**Kyriakopoulos George**](https://github.com/geokyr)
-* [**Tsertou Eleni**](https://github.com/ElliT42)
-* [**Tzelepis Serafeim**](https://github.com/sertze)
+- [**Kyriakopoulos George**](https://github.com/geokyr)
+- [**Tsertou Eleni**](https://github.com/ElliT42)
+- [**Tzelepis Serafeim**](https://github.com/sertze)
 
 ## Project Description
 
@@ -23,10 +23,10 @@ We used [~okeanos](https://astakos.okeanos-knossos.grnet.gr/ui/landing) to set u
 ## SSH
 
 We used SSH to connect to the nodes of the cluster. We also set up passwordless SSH, so that we can connect to the nodes without having to enter a password. To do this, we used the following 2 commands on a local machine to first generate a public/private key pair and then copy the public key to the remote nodes.
-```
-ssh-keygen
-ssh-copy-id <user>@<remote-node>
-```
+
+    ssh-keygen
+    ssh-copy-id <user>@<remote-node>
+
 
 Finally, we used the `remote-scp.sh` script, located under the `scripts/` directory, to copy any directory or file from a local machine to the remote nodes. This script is suited for the virtual machine names that the [~okeanos](https://astakos.okeanos-knossos.grnet.gr/ui/landing) service provides and needs the 5 digits that are in the first machine's name, copying the files to this and the next 4 machines (it supposes that the 5 machines have sequential digits on their names).
 
@@ -39,15 +39,15 @@ To update the hosts file, we used the `hosts.sh` script, located under the `scri
 To download Python3.8 and pip, we used the `python-pip.sh` script, located under the `scripts/` directory, as well. This script downloads and builds Python3.8 from source and then downloads and installs pip.
 
 To download and install the required dependencies, we used the `requirements.txt` file, located under the `src/` directory. This file contains all the required dependencies and their versions. To create the file we used the following commands, after installing all the necessary dependencies on the bootstrap machine:
-```
-cd src
-pip freeze > requirements.txt
-```
+
+    cd src
+    pip freeze > requirements.txt
+
 
 To install the dependencies on the rest of the machines, we used the following command, after having copied the file to them:
-```
-pip install -r requirements.txt
-```
+
+    pip install -r requirements.txt
+
 
 ## Implementation
 
@@ -60,27 +60,27 @@ An outline of the code structure is available on the project report. There, the 
 ### REST API
 
 To see the blockchain system in action, every node needs to start its REST API on a port of choice. In the case of a network with 5 nodes, each machine will run the REST API on a single port, while in the case of 10 nodes, each machine will run it on two different ports. The REST API is started by running the `main.py` script, located under the `src/` directory, with the following command:
-```
-python3.8 main.py -p <port> -n <number-of-nodes> -c <capacity> -b
-```
+
+    python3.8 main.py -p <port> -n <number-of-nodes> -c <capacity> -b
+
 
 The `-p` flag is used to specify the port on which the REST API will run, while the `-n` flag is used to specify the number of nodes in the network. The `-c` flag is used to specify the block capacity, which is the maximum number of transactions that can be included in a block. The `-b` flag is optionally used to specify that the node is the bootstrap node, and should only be set on the bootstrap node (the first one on the network).
 
 ### CLI Client
 
 After the REST API is running on every node, the client can be used to interact with the blockchain system. The client is started by running the `noobcash.py` file, located under the `src/` directory, with the following command:
-```
-python3.8 noobcash.py -p <port>
-```
+
+    python3.8 noobcash.py -p <port>
+
 
 The `-p` flag is used to specify the port on which the REST API is listening on that node. The user can then select a command and enter the required arguments if needed to interact with the blockchain system.
 
 ### Testing
 
 To test the blockchain system, we used the `run_test_files.py` script, located under the `test/` directory. This script sends 100 transactions to the blockchain system, coming from the node that the script is executed on. The script can be run with the following command:
-```
-python3.8 run_test_files.py -d <transactions-directory> -p <port>
-```
+
+    python3.8 run_test_files.py -d <transactions-directory> -p <port>
+
 
 The `-d` flag is used to specify the directory that contains the sample transactions (e.g. `transactions/5nodes`), while the `-p` flag is used to specify the port on which the REST API is listening on that node.
 
