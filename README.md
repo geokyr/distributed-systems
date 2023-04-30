@@ -4,15 +4,15 @@ Semester Project for the [**Distributed Systems**](https://www.ece.ntua.gr/en/un
 
 ## Team 1 - Members
 
-- [**Kyriakopoulos George**](https://github.com/geokyr)
+- [**Kyriakopoulos Georgios**](https://github.com/geokyr)
 - [**Tsertou Eleni**](https://github.com/ElliT42)
 - [**Tzelepis Serafeim**](https://github.com/sertze)
 
 ## Project Description
 
-The Noobcash project is a Python-based implementation of a blockchain system designed to facilitate secure and decentralized transactions without the need for a central authority. The system achieves this by utilizing a distributed database, which ensures that all nodes within the network have access to the same information and can verify the validity of any transaction.
+The **Noobcash** project is a **Python-based** implementation of a **blockchain system** designed to **facilitate secure and decentralized transactions** without the need for a central authority. The system achieves this by utilizing a distributed database, which ensures that all nodes within the network have access to the same information and can verify the validity of any transaction.
 
-As part of the project's development, several experiments were conducted to analyze the system's performance in terms of throughput and block times under varying conditions. These experiments involved testing different combinations of block capacity and mining difficulty levels. Additionally, the scalability of the system was tested by increasing the number of nodes within the network from 5 to 10. Through these experiments, valuable insights were gained into the system's behavior under different conditions, which can inform future improvements and developments in blockchain technology.
+As part of the project's development, several experiments were conducted to analyze the **system's performance** in terms of **throughput** and **block times** under varying conditions. These experiments involved testing different combinations of **block capacity** and **mining difficulty levels**. Additionally, the **scalability** of the system was tested by increasing the number of nodes within the network from 5 to 10. Through these experiments, valuable insights were gained into the system's behavior under different conditions, which can inform future improvements and developments in blockchain technology.
 
 ## Setup
 
