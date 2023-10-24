@@ -4,9 +4,9 @@ Semester Project for the [Distributed Systems](https://www.ece.ntua.gr/en/underg
 
 ## Team 1 - Members
 
-- [Kyriakopoulos Georgios](https://github.com/geokyr)
-- [Tsertou Eleni](https://github.com/EleniTser)
-- [Tzelepis Serafeim](https://github.com/sertze)
+- [Eleni Tsertou](https://github.com/EleniTser)
+- [Georgios Kyriakopoulos](https://github.com/geokyr)
+- [Serafeim Tzelepis](https://github.com/sertze)
 
 ## Project Description
 
