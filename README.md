@@ -2,7 +2,7 @@
 
 Semester Project for the [Distributed Systems](https://www.ece.ntua.gr/en/undergraduate/courses/3377) course, during the 9th semester of the School of Electrical and Computer Engineering at the National Technical University of Athens.
 
-## Team 1 - Members
+## Contributors
 
 - [Eleni Tsertou](https://github.com/EleniTser)
 - [Georgios Kyriakopoulos](https://github.com/geokyr)
